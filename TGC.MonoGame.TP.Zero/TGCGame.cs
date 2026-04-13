@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq.Expressions;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -76,6 +77,7 @@ public class TGCGame : Game
         _city = new CityScene(Content, ContentFolder3D, ContentFolderEffects);
 
         // La carga de contenido debe ser realizada aca.
+        _carModel = Content.Load<Model>(ContentFolder3D + "scene/car");
 
         base.LoadContent();
     }
@@ -86,6 +88,8 @@ public class TGCGame : Game
     /// </summary>
     protected override void Update(GameTime gameTime)
     {
+        float _linear_speed = 500f;
+        float _rotation_speed = 0.5f;
         // Capturo el estado del teclado.
         var keyboardState = Keyboard.GetState();
         if (keyboardState.IsKeyDown(Keys.Escape))
@@ -95,13 +99,24 @@ public class TGCGame : Game
         }
 
         // La logica debe ir aca.
+        if (keyboardState.IsKeyDown(Keys.W) ^ keyboardState.IsKeyDown(Keys.S))
+        {
+            Vector3 _forwardOrBackwards = keyboardState.IsKeyDown(Keys.W) ? Vector3.Forward : Vector3.Backward;
+            _carWorld *= Matrix.CreateTranslation(_forwardOrBackwards * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed);
+        }
+
+        if (keyboardState.IsKeyDown(Keys.A) ^ keyboardState.IsKeyDown(Keys.D))
+        {
+            int _spin = keyboardState.IsKeyDown(Keys.A) ? -1 : 1;
+            _carWorld *= Matrix.CreateRotationY((float)gameTime.ElapsedGameTime.TotalSeconds * _spin * _rotation_speed);
+        }
 
         // Actualizo la camara, enviandole la matriz de mundo del auto.
         _followCamera.Update(gameTime, _carWorld);
 
         base.Update(gameTime);
     }
-    
+
     /// <summary>
     ///     Llamada para cada frame.
     ///     La logica de dibujo debe ir aca.
@@ -115,6 +130,7 @@ public class TGCGame : Game
         _city.Draw(gameTime, _followCamera.View, _followCamera.Projection);
 
         // El dibujo del auto debe ir aca.
+        _carModel.Draw(_carWorld, _followCamera.View, _followCamera.Projection);
 
         base.Draw(gameTime);
     }
