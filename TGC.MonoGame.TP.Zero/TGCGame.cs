@@ -101,7 +101,7 @@ public class TGCGame : Game
         // La logica debe ir aca.
         if (keyboardState.IsKeyDown(Keys.W) ^ keyboardState.IsKeyDown(Keys.S))
         {
-            Vector3 _forwardOrBackwards = keyboardState.IsKeyDown(Keys.W) ? Vector3.Forward : Vector3.Backward;
+            Vector3 _forwardOrBackwards = keyboardState.IsKeyDown(Keys.W) ? _carWorld.Forward : _carWorld.Backward;
             _carWorld *= Matrix.CreateTranslation(_forwardOrBackwards * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed);
         }
 
