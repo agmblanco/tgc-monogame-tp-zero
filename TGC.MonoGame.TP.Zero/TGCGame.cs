@@ -84,7 +84,9 @@ public class TGCGame : Game
         base.LoadContent();
     }
 
-    float _linear_speed = 500f;
+    const float _acceleration = 100; 
+
+    float _linear_speed = 0f;
     float _rotation_speed = 0.5f;
 
     Vector3 _car_position_offset = Vector3.Zero;
@@ -107,9 +109,11 @@ public class TGCGame : Game
         // La logica debe ir aca.
         if (keyboardState.IsKeyDown(Keys.W) ^ keyboardState.IsKeyDown(Keys.S))
         {
-            Vector3 _forwardOrBackwards = keyboardState.IsKeyDown(Keys.W) ? _carWorld.Forward : _carWorld.Backward;
-            _car_position_offset += _forwardOrBackwards * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed;
+            float direction =  keyboardState.IsKeyDown(Keys.W) ? 1 : -1;
+            _linear_speed +=  direction * _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
+
+        _car_position_offset += _carWorld.Forward * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed;
 
         if (keyboardState.IsKeyDown(Keys.A) ^ keyboardState.IsKeyDown(Keys.D))
         {
