@@ -19,6 +19,7 @@ public class TGCGame : Game
 
     private Model _carModel;
     private Matrix _carWorld;
+    private Matrix _originalCarWorld;
     private CityScene _city;
     private FollowCamera _followCamera;
 
@@ -62,6 +63,7 @@ public class TGCGame : Game
 
         // Configuro la matriz de mundo del auto.
         _carWorld = Matrix.Identity;
+        _originalCarWorld = _carWorld;
 
         base.Initialize();
     }
@@ -82,14 +84,18 @@ public class TGCGame : Game
         base.LoadContent();
     }
 
+    float _linear_speed = 500f;
+    float _rotation_speed = 0.5f;
+
+    Vector3 _car_position_offset = Vector3.Zero;
+    float _car_rotation = 0f;
+
     /// <summary>
     ///     Es llamada N veces por segundo. Generalmente 60 veces pero puede ser configurado.
     ///     La logica general debe ser escrita aca, junto al procesamiento de mouse/teclas.
     /// </summary>
     protected override void Update(GameTime gameTime)
     {
-        float _linear_speed = 500f;
-        float _rotation_speed = 0.5f;
         // Capturo el estado del teclado.
         var keyboardState = Keyboard.GetState();
         if (keyboardState.IsKeyDown(Keys.Escape))
@@ -102,14 +108,16 @@ public class TGCGame : Game
         if (keyboardState.IsKeyDown(Keys.W) ^ keyboardState.IsKeyDown(Keys.S))
         {
             Vector3 _forwardOrBackwards = keyboardState.IsKeyDown(Keys.W) ? _carWorld.Forward : _carWorld.Backward;
-            _carWorld *= Matrix.CreateTranslation(_forwardOrBackwards * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed);
+            _car_position_offset += _forwardOrBackwards * (float)gameTime.ElapsedGameTime.TotalSeconds * _linear_speed;
         }
 
         if (keyboardState.IsKeyDown(Keys.A) ^ keyboardState.IsKeyDown(Keys.D))
         {
-            int _spin = keyboardState.IsKeyDown(Keys.A) ? -1 : 1;
-            _carWorld *= Matrix.CreateRotationY((float)gameTime.ElapsedGameTime.TotalSeconds * _spin * _rotation_speed);
+            int _spin = keyboardState.IsKeyDown(Keys.A) ? 1 : -1;
+            _car_rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * _spin * _rotation_speed;
         }
+
+        _carWorld = Matrix.CreateRotationY(_car_rotation) * Matrix.CreateTranslation(_car_position_offset) * _originalCarWorld;
 
         // Actualizo la camara, enviandole la matriz de mundo del auto.
         _followCamera.Update(gameTime, _carWorld);
