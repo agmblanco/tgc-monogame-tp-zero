@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -85,12 +86,17 @@ public class TGCGame : Game
     }
 
     const float _acceleration = 100; 
+    const float _jump_acceleration = 150;
+    const float _gravity = -98f;
+
 
     float _linear_speed = 0f;
     float _rotation_speed = 0.5f;
 
     Vector3 _car_position_offset = Vector3.Zero;
     float _car_rotation = 0f;
+
+    float _vertical_speed = 0f;
 
     /// <summary>
     ///     Es llamada N veces por segundo. Generalmente 60 veces pero puede ser configurado.
@@ -120,6 +126,24 @@ public class TGCGame : Game
             int _spin = keyboardState.IsKeyDown(Keys.A) ? 1 : -1;
             _car_rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * _spin * _rotation_speed;
         }
+    
+        if (keyboardState.IsKeyDown(Keys.Space))
+        {
+            _vertical_speed += (float)gameTime.ElapsedGameTime.TotalSeconds * _jump_acceleration;
+        }
+        else
+        {
+            _vertical_speed += (float)gameTime.ElapsedGameTime.TotalSeconds * _gravity;
+        }
+        
+        _car_position_offset += Vector3.Up * (float)gameTime.ElapsedGameTime.TotalSeconds * _vertical_speed;
+
+        if(_car_position_offset.Y < 0)
+        {
+            _car_position_offset.Y = 0;
+            _vertical_speed = 0;
+        }
+        
 
         _carWorld = Matrix.CreateRotationY(_car_rotation) * Matrix.CreateTranslation(_car_position_offset) * _originalCarWorld;
 
